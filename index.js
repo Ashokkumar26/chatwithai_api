@@ -70,12 +70,11 @@ mongoose.connect(url, options)
 // sendOTPViaSMS(phoneNumber, otpCode);
 
 
-const configuration = new Configuration({
-  apiKey: "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",
-});
-const openai = new OpenAIApi(configuration);
-
-async function chatInitiation(message) {
+async function chatInitiation(message, key) {
+  const configuration = new Configuration({
+    apiKey: key,
+  });
+  const openai = new OpenAIApi(configuration);
     // role - defined as 'system', 'assistant', 'user', 'function'
     const chatCompletion = await openai.createChatCompletion({
         model: "gpt-3.5-turbo",
@@ -138,10 +137,10 @@ app.post('/login', async (req, res) => {
 // Define API endpoint
 app.post('/chat', validateToken, async (req, res) => {
   try {
-    const { message } = req.body;
-    console.log("Req::", req.user, req.body);
+    const { message, key } = req.body;
+    // console.log("Req::", req.user, req.body);
     // Check if the token is provided
-    let response = await chatInitiation(message);
+    let response = await chatInitiation(message, key);
     let time = new Date().toLocaleTimeString();
     let date = new Date().toLocaleDateString();
     let data = {name: req.user.name,
