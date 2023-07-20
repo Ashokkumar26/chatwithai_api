@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const { Configuration, OpenAIApi } = require("openai");
-const { SetUser, GetUser } = require('./schema/loginUser');
+const { SetUser, GetUser, SetUserChat } = require('./schema/loginUser');
 var jwt = require('jsonwebtoken');
 const twilio = require('twilio');
 
@@ -71,7 +71,7 @@ mongoose.connect(url, options)
 
 
 const configuration = new Configuration({
-  apiKey: "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",
+  apiKey: "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",
 });
 const openai = new OpenAIApi(configuration);
 
@@ -142,6 +142,15 @@ app.post('/chat', validateToken, async (req, res) => {
     console.log("Req::", req.user, req.body);
     // Check if the token is provided
     let response = await chatInitiation(message);
+    let time = new Date().toLocaleTimeString();
+    let date = new Date().toLocaleDateString();
+    let data = {name: req.user.name,
+       userMessage: message,
+      aiResponse: response.content,
+      dateTime: date.concat(` ${time}`)
+    }
+    let userChat = new SetUserChat(data);
+    userChat.save();
     res.json({ message: response  });
   } catch (error) {
     console.error(error);

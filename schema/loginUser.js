@@ -28,7 +28,27 @@ const getUserSchema = new mongoose.Schema({
     password: String
 });
 
+const userChatSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  userMessage: {
+    type: String,
+    required: true
+  },
+  aiResponse: {
+    type: String,
+    required: true
+  },
+  dateTime: {
+    type: String,
+    required: true
+  }
+})
+
 // Create a model from the schema
 const SetUser = mongoose.model('User', setUserSchema);
 const GetUser = mongoose.model('Users', getUserSchema);
-module.exports = { SetUser, GetUser }
+const SetUserChat = mongoose.model('Message', userChatSchema)
+module.exports = { SetUser, GetUser, SetUserChat }
