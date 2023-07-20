@@ -5,6 +5,7 @@ const { Configuration, OpenAIApi } = require("openai");
 const { SetUser, GetUser, SetUserChat } = require('./schema/loginUser');
 var jwt = require('jsonwebtoken');
 const twilio = require('twilio');
+var CryptoJS = require("crypto-js");
 
 const app = express();
 app.use(cors());
@@ -94,12 +95,15 @@ function validateToken(req, res, next) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ message: 'Invalid or missing Authorization header' });
       }
-      const token = authHeader.split(' ')[1];
-    jwt.verify(token, secret, (err, decoded) => {
+      const ciphertext = authHeader.split(' ')[1];
+      let bytes  = CryptoJS.AES.decrypt(ciphertext, 'secretkey1');
+      let originalText = bytes.toString(CryptoJS.enc.Utf8).split('chatwithai')
+    jwt.verify(originalText[0], secret, (err, decoded) => {
         if (err) {
           return res.status(403).json({ message: 'Invalid token' });
         }
         req.user = decoded;
+        req.apiKey = originalText[1]
         next()
 })
 }
@@ -137,10 +141,10 @@ app.post('/login', async (req, res) => {
 // Define API endpoint
 app.post('/chat', validateToken, async (req, res) => {
   try {
-    const { message, key } = req.body;
+    const { message } = req.body;
     // console.log("Req::", req.user, req.body);
     // Check if the token is provided
-    let response = await chatInitiation(message, key);
+    let response = await chatInitiation(message, req.apiKey);
     let time = new Date().toLocaleTimeString();
     let date = new Date().toLocaleDateString();
     let data = {name: req.user.name,
